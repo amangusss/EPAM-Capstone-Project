@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - Shopping List App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <style>
+        .help-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .help-step {
+            background: white;
+            border-left: 4px solid #007bff;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .help-step h5 {
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div th:if="${isLoggedIn}" th:replace="~{layouts/fragments/navbar :: navbar}"></div>
+    
+    <div class="page-header text-center">
+        <div class="container">
+            <h1>Help & Support</h1>
+            <p>Learn how to use Shopping List App effectively</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="help-section">
+            <div class="help-step">
+                <h5>1. Create Your First List</h5>
+                <p>Start by creating a shopping list. Click on "Create New List" from your dashboard or the lists page.</p>
+                <ul>
+                    <li>Give your list a descriptive name</li>
+                    <li>Add a description to remember what you're shopping for</li>
+                    <li>Choose a priority level (Urgent, High, Medium, Low)</li>
+                </ul>
+            </div>
+            
+            <div class="help-step">
+                <h5>2. Add Items to Your List</h5>
+                <p>Once you have a list, start adding items you need to buy.</p>
+                <ul>
+                    <li>Specify the item name and quantity</li>
+                    <li>Choose a category to organize your items</li>
+                    <li>Set a priority level for each item</li>
+                    <li>Add estimated price and notes if needed</li>
+                </ul>
+            </div>
+            
+            <div class="help-step">
+                <h5>3. Organize and Shop</h5>
+                <p>Use categories and priorities to organize your shopping trip efficiently.</p>
+                <ul>
+                    <li>Group items by category (e.g., Dairy, Produce, Meat)</li>
+                    <li>Focus on high-priority items first</li>
+                    <li>Mark items as purchased when you buy them</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2 class="mb-4">
+                <i class="bi bi-star text-warning"></i> Key Features
+            </h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="text-center">
+                            <i class="bi bi-list-check feature-icon"></i>
+                            <h5>Smart Lists</h5>
+                            <p>Create unlimited shopping lists with custom names and descriptions. Organize items by categories and priorities.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="text-center">
+                            <i class="bi bi-tags feature-icon"></i>
+                            <h5>Categories</h5>
+                            <p>Organize your items into custom categories to make shopping more efficient and organized.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="text-center">
+                            <i class="bi bi-share feature-icon"></i>
+                            <h5>List Sharing</h5>
+                            <p>Share your shopping lists with family members or roommates for collaborative shopping.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="text-center">
+                            <i class="bi bi-wallet2 feature-icon"></i>
+                            <h5>Budget Tracking</h5>
+                            <p>Set budgets for your shopping trips and track estimated vs. actual spending.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2 class="mb-4">
+                <i class="bi bi-lightbulb text-warning"></i> Tips & Tricks
+            </h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6><i class="bi bi-check-circle text-success"></i> Use Categories Wisely</h6>
+                            <p>Create categories that match your local store layout to minimize walking around.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6><i class="bi bi-check-circle text-success"></i> Set Priorities</h6>
+                            <p>Mark essential items as "Urgent" so you don't forget the most important things.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6><i class="bi bi-check-circle text-success"></i> Estimate Prices</h6>
+                            <p>Add estimated prices to get a rough idea of your total spending before shopping.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6><i class="bi bi-check-circle text-success"></i> Mark as Purchased</h6>
+                            <p>Check off items as you buy them to keep track of your progress.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2 class="mb-4">
+                <i class="bi bi-question-circle text-info"></i> Frequently Asked Questions
+            </h2>
+            
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq1">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                            How do I create a new shopping list?
+                        </button>
+                    </h2>
+                    <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Go to your dashboard and click "Create New List" or navigate to the Lists page and click the "Create New List" button. Fill in the list name, description, and priority level.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq2">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                            Can I share my shopping list with others?
+                        </button>
+                    </h2>
+                    <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes! You can share your shopping lists with other users. Go to your list detail page and click the "Share" button to invite others to collaborate.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq3">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                            How do I mark items as completed?
+                        </button>
+                    </h2>
+                    <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Simply check the checkbox next to each item as you purchase it. The item will be marked as completed and you can track your shopping progress.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq4">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                            Can I set a budget for my shopping trip?
+                        </button>
+                    </h2>
+                    <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes! You can create budgets for your shopping trips. Go to the Budgets page to set spending limits and track your expenses.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center py-5">
+            <h3>Still Need Help?</h3>
+            <p class="text-muted mb-4">Can't find what you're looking for? Contact our support team.</p>
+            <a href="/contact" class="btn btn-primary btn-lg">
+                <i class="bi bi-envelope"></i> Contact Support
+            </a>
+        </div>
+    </div>
+
+    <div th:replace="~{layouts/fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/app.js"></script>
+</body>
+</html>
