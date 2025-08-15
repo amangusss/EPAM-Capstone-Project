@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${list.name}">List</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h1 th:text="${list.name}">List Name</h1>
+            <p class="text-muted" th:text="${list.description}">Description</p>
+        </div>
+        <a href="/lists" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Items</h6>
+                    <h3 th:text="${#lists.size(items)}">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Completed</h6>
+                    <h3 th:text="${#lists.size(items.?[isPurchased])}">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Estimated Cost</h6>
+                    <h3>$<span th:text="${#numbers.formatDecimal(totalEstimated, 0, 2)}">0.00</span></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Actual Spent</h6>
+                    <h3>$<span th:text="${#numbers.formatDecimal(totalSpent, 0, 2)}">0.00</span></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="mb-3">Progress</h5>
+            <div class="progress mb-2" style="height: 20px;">
+                <div class="progress-bar" th:style="'width: ' + ${completionPercent} + '%'">
+                    <span th:text="${#numbers.formatDecimal(completionPercent, 0, 0)} + '%'">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="mb-3">Add New Item</h5>
+            <form th:action="@{/lists/{id}/items(id=${list.id})}" th:object="${newItem}" method="post">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <input type="text" class="form-control" th:field="*{name}" placeholder="Item name" required>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <input type="number" class="form-control" th:field="*{quantity}" placeholder="Qty" min="1" value="1">
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <input type="number" class="form-control" th:field="*{estimatedPrice}" placeholder="Price" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <select class="form-select" th:field="*{categoryId}" required>
+                            <option value="">Category</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mb-3">Items</h5>
+
+            <div th:if="${#lists.isEmpty(items)}" class="text-center py-4">
+                <i class="bi bi-cart text-muted" style="font-size: 48px;"></i>
+                <p class="mt-3 text-muted">No items in this list yet</p>
+            </div>
+
+            <div th:each="item : ${items}" class="list-item" th:classappend="${item.isPurchased} ? 'completed' : ''">
+                <div class="d-flex align-items-center">
+                    <form th:action="@{/items/{id}/toggle(id=${item.id})}" method="post" class="me-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input"
+                                   th:checked="${item.isPurchased}"
+                                   onchange="this.form.submit()">
+                        </div>
+                    </form>
+
+                    <div class="flex-fill">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="item-name fw-bold" th:text="${item.name}">Item Name</span>
+                                <span class="badge bg-light text-dark ms-2" th:text="${item.categoryName}">Category</span>
+                                <div class="small text-muted mt-1">
+                                    Qty: <span th:text="${item.quantity}">1</span>
+                                    <span th:if="${item.estimatedPrice}">
+                                            • Est: $<span th:text="${#numbers.formatDecimal(item.estimatedPrice, 0, 2)}">0.00</span>
+                                        </span>
+                                    <span th:if="${item.actualPrice}" class="text-success">
+                                            • Paid: $<span th:text="${#numbers.formatDecimal(item.actualPrice, 0, 2)}">0.00</span>
+                                        </span>
+                                </div>
+                            </div>
+
+                            <form th:action="@{/items/{id}/delete(id=${item.id})}" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

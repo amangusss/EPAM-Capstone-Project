@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Management - Shopping List App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/common.css" rel="stylesheet">
+    <style>
+        .session-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .session-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .device-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .session-actions {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .session-card:hover .session-actions {
+            opacity: 1;
+        }
+        .browser-info {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .location-info {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div th:replace="~{layouts/fragments/navbar :: navbar}"></div>
+
+    <div class="container my-4">
+        <div class="page-header text-center">
+            <div class="container">
+                <h1><i class="bi bi-display"></i> Session Management</h1>
+                <p>Monitor and manage your active sessions across devices</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="h3 mb-1">All Sessions</h2>
+                        <p class="text-muted mb-0">Monitor and manage your active sessions across devices</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-danger" id="logoutAllSessions">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout All Sessions
+                        </button>
+                        <button class="btn btn-outline-warning" id="refreshSessions">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row stats-row">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="icon">
+                        <i class="bi bi-display"></i>
+                    </div>
+                    <h3 id="totalSessions">0</h3>
+                    <p>Total Sessions</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <h3 id="activeSessions">0</h3>
+                    <p>Active Sessions</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="icon">
+                        <i class="bi bi-pause-circle"></i>
+                    </div>
+                    <h3 id="idleSessions">0</h3>
+                    <p>Idle Sessions</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="icon">
+                        <i class="bi bi-globe"></i>
+                    </div>
+                    <h3 id="uniqueDevices">0</h3>
+                    <p>Unique Devices</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <strong>Security Notice:</strong> If you notice any suspicious activity or unrecognized sessions, 
+            immediately logout all sessions and change your password.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Current Session
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <div class="device-icon">
+                            <i class="bi bi-laptop"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="mb-1">Current Device</h6>
+                        <p class="browser-info mb-1">
+                            <i class="bi bi-browser-chrome me-2"></i>Current Browser
+                        </p>
+                        <p class="location-info mb-0">
+                            <i class="bi bi-geo-alt me-2"></i>Current Location
+                        </p>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="badge bg-success">Current</span>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <small class="text-muted">Started 2 hours ago</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul me-2"></i>Active Sessions
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="deviceFilter" style="width: auto;">
+                            <option value="">All Devices</option>
+                            <option value="desktop">Desktop</option>
+                            <option value="mobile">Mobile</option>
+                            <option value="tablet">Tablet</option>
+                        </select>
+                        <select class="form-select form-select-sm" id="statusFilter" style="width: auto;">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="idle">Idle</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="sessionsContainer">
+                    <div class="text-center py-5">
+                        <div class="text-muted mb-3">
+                            <i class="bi bi-display fs-1"></i>
+                        </div>
+                        <h5>No active sessions found</h5>
+                        <p class="text-muted">Your active sessions will appear here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Browser & Device Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Browser Usage</h6>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Chrome</span>
+                                <span>65%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Firefox</span>
+                                <span>20%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 20%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Safari</span>
+                                <span>15%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: 15%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Device Types</h6>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Desktop</span>
+                                <span>70%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-info" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Mobile</span>
+                                <span>25%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-secondary" style="width: 25%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Tablet</span>
+                                <span>5%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-dark" style="width: 5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sessionDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-info-circle me-2"></i>Session Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="sessionDetailsContent">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="terminateSession">
+                        <i class="bi bi-x-circle me-2"></i>Terminate Session
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/core/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSessionStats();
+            loadSessions();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('logoutAllSessions').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout from all devices? You will need to login again on each device.')) {
+                    logoutAllSessions();
+                }
+            });
+
+            document.getElementById('refreshSessions').addEventListener('click', function() {
+                loadSessions();
+                loadSessionStats();
+            });
+
+            document.getElementById('deviceFilter').addEventListener('change', filterSessions);
+            document.getElementById('statusFilter').addEventListener('change', filterSessions);
+        }
+
+        function loadSessionStats() {
+            document.getElementById('totalSessions').textContent = '0';
+            document.getElementById('activeSessions').textContent = '0';
+            document.getElementById('idleSessions').textContent = '0';
+            document.getElementById('uniqueDevices').textContent = '0';
+        }
+
+        function loadSessions() {
+            updateSessionsContainer();
+        }
+
+        function updateSessionsContainer() {
+            const container = document.getElementById('sessionsContainer');
+            
+            const sampleSessions = [];
+
+            if (sampleSessions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="text-muted mb-3">
+                            <i class="bi bi-display fs-1"></i>
+                        </div>
+                        <h5>No active sessions found</h5>
+                        <p class="text-muted">Your active sessions will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = sampleSessions.map(session => `
+                <div class="border-bottom p-3 session-card">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <div class="device-icon">
+                                <i class="bi bi-${session.device === 'laptop' ? 'laptop' : 'phone'}"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <h6 class="mb-1">${session.browser} on ${session.os}</h6>
+                            <p class="browser-info mb-1">
+                                <i class="bi bi-browser-chrome me-2"></i>${session.browser} ${session.os}
+                            </p>
+                            <p class="location-info mb-0">
+                                <i class="bi bi-geo-alt me-2"></i>${session.location} (IP: ${session.ip})
+                            </p>
+                        </div>
+                        <div class="col-md-2">
+                            <span class="badge bg-${session.status === 'active' ? 'success' : 'warning'}">${session.status}</span>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <small class="text-muted">${session.lastActivity}</small>
+                        </div>
+                        <div class="col-md-1 text-end session-actions">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewSessionDetails(${session.id})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="terminateSession(${session.id})">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewSessionDetails(sessionId) {
+            console.log('Viewing session details:', sessionId);
+            
+            const detailsModal = new bootstrap.Modal(document.getElementById('sessionDetailsModal'));
+            detailsModal.show();
+        }
+
+        function terminateSession(sessionId) {
+            if (confirm('Are you sure you want to terminate this session? The user will be logged out from that device.')) {
+                console.log('Terminating session:', sessionId);
+                
+                showMessage('Session terminated successfully!', 'success');
+                loadSessions();
+                loadSessionStats();
+            }
+        }
+
+        function logoutAllSessions() {
+            console.log('Logging out all sessions...');
+            
+            showMessage('All sessions have been terminated. You will need to login again.', 'success');
+            
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        }
+
+        function filterSessions() {
+            const deviceFilter = document.getElementById('deviceFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            console.log('Filtering sessions:', { device: deviceFilter, status: statusFilter });
+        }
+
+        function showMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

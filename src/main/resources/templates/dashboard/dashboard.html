@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Shopping List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+    <div th:replace="~{layouts/fragments/navbar :: navbar}"></div>
+
+    <div class="page-header text-center">
+        <div class="container">
+            <h1>Dashboard</h1>
+            <p>Welcome back!</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-primary" th:text="${totalLists}">0</h3>
+                        <p class="text-muted mb-0">Total Lists</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-success" th:text="${completedLists}">0</h3>
+                        <p class="text-muted mb-0">Completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h3 class="text-info" th:text="${totalShared}">0</h3>
+                        <p class="text-muted mb-0">Shared Lists</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Lists</h5>
+                        <a href="/lists" class="btn btn-primary btn-sm">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(lists)}" class="text-center py-4">
+                            <p class="text-muted">No shopping lists yet</p>
+                            <a href="/lists/create" class="btn btn-primary">Create Your First List</a>
+                        </div>
+                        <div th:each="list : ${lists}" class="d-flex align-items-center py-2 border-bottom">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a th:href="@{/lists/{id}(id=${list.id})}" 
+                                       th:text="${list.name}" 
+                                       class="text-decoration-none">List Name</a>
+                                </h6>
+                                <small class="text-muted" th:text="${#temporals.format(list.creationDate, 'MMM dd, yyyy')}">Date</small>
+                            </div>
+                            <div class="ms-3">
+                                <span th:if="${list.status.name() == 'ARCHIVED'}" class="badge bg-success">Completed</span>
+                                <span th:if="${list.status.name() == 'ACTIVE'}" class="badge bg-primary">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/lists/create" class="btn btn-primary">Create New List</a>
+                            <a href="/categories" class="btn btn-outline-primary">Manage Categories</a>
+                            <a href="/budgets" class="btn btn-outline-primary">Set Budget</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{layouts/fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/app.js"></script>
+</body>
+</html>

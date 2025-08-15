@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Shopping Lists</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <style>
+        .shared-list-card {
+            border-left: 4px solid #17a2b8;
+            background-color: #f8f9fa;
+        }
+        
+        .shared-list-card .card-body {
+            background-color: #f8f9fa;
+        }
+        
+        .shared-list-card:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+            transition: all 0.2s ease;
+        }
+        
+        .shared-list-card .badge.bg-info {
+            background-color: #17a2b8 !important;
+        }
+        
+        .shared-list-card .badge.bg-secondary {
+            background-color: #6c757d !important;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{layouts/fragments/navbar :: navbar}"></div>
+
+    <div class="page-header text-center">
+        <div class="container">
+            <h1>My Shopping Lists</h1>
+            <p>Manage your shopping lists and access shared lists</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="action-bar">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h3 mb-1">My Lists</h2>
+                    <p class="text-muted mb-0">
+                        <span th:text="${#lists.size(lists)}">0</span> shopping lists
+                    </p>
+                </div>
+                <a href="/lists/create" class="btn btn-primary btn-lg">Create New List</a>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${#lists.isEmpty(lists)}" class="empty-state">
+            <div class="text-center py-5">
+                <div class="text-muted mb-3">
+                    <i class="bi bi-list-ul fs-1"></i>
+                </div>
+                <h5>No shopping lists yet</h5>
+                <p class="text-muted mb-4">Create your first shopping list to get started</p>
+                <a href="/lists/create" class="btn btn-primary btn-lg">Create Your First List</a>
+            </div>
+        </div>
+
+        <div th:each="list : ${lists}" class="card mb-3" 
+             th:data-list-id="${list.id}"
+             th:data-status="${list.status}"
+             th:data-priority="${list.priority}"
+             th:data-total-items="${list.totalItems}"
+             th:data-purchased-items="${list.purchasedItems}"
+             th:data-created-at="${list.creationDate}">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="card-title mb-2">
+                            <a th:href="@{/lists/{id}(id=${list.id})}" 
+                               th:text="${list.name}" 
+                               class="text-decoration-none">List Name</a>
+                        </h5>
+                        
+                        <p th:if="${list.description}" class="text-muted mb-2" th:text="${list.description}">Description</p>
+                        
+                        <div class="d-flex gap-2 mb-2">
+                            <span class="badge bg-primary">
+                                <span th:text="${list.totalItems != null ? list.totalItems : 0}">0</span> items
+                            </span>
+                            <span class="badge bg-success">
+                                <span th:text="${list.purchasedItems != null ? list.purchasedItems : 0}">0</span> completed
+                            </span>
+                            <span th:if="${list.priority}" 
+                                  th:class="${'badge ' + 
+                                  (list.priority == 'URGENT' ? 'bg-danger' : 
+                                   list.priority == 'HIGH' ? 'bg-warning' : 
+                                   list.priority == 'MEDIUM' ? 'bg-info' : 'bg-secondary')}"
+                                  th:text="${list.priority}">Priority</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 text-md-end">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/lists/{id}(id=${list.id})}" class="btn btn-primary">View List</a>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/lists/{id}/edit(id=${list.id})}">Edit</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/lists/{id}/share(id=${list.id})}">Share</a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button type="button" class="dropdown-item text-danger" 
+                                                th:onclick="'handleDelete(\'list\', \'' + ${list.id} + '\')'"
+                                                th:data-debug-id="${list.id}">
+                                            Delete
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${not #lists.isEmpty(sharedLists)}" class="mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h3 mb-1">Shared With Me</h2>
+                    <p class="text-muted mb-0">
+                        <span th:text="${#lists.size(sharedLists)}">0</span> lists shared with you by other users
+                    </p>
+                </div>
+            </div>
+
+            <div th:each="sharedList : ${sharedLists}" class="card mb-3 shared-list-card" 
+                 th:data-list-id="${sharedList.id}"
+                 th:data-status="${sharedList.status}"
+                 th:data-priority="${sharedList.priority}"
+                 th:data-total-items="${sharedList.totalItems}"
+                 th:data-purchased-items="${sharedList.purchasedItems}"
+                 th:data-created-at="${sharedList.creationDate}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="card-title mb-0 me-2">
+                                    <a th:href="@{/lists/{id}(id=${sharedList.id})}" 
+                                       th:text="${sharedList.name}" 
+                                       class="text-decoration-none">Shared List Name</a>
+                                </h5>
+                                <span class="badge bg-info">
+                                    <i class="bi bi-share me-1"></i>Shared
+                                </span>
+                            </div>
+                            
+                            <p th:if="${sharedList.description}" class="text-muted mb-2" th:text="${sharedList.description}">Description</p>
+                            
+                            <div class="d-flex gap-2 mb-2">
+                                <span class="badge bg-primary">
+                                    <span th:text="${sharedList.totalItems != null ? sharedList.totalItems : 0}">0</span> items
+                                </span>
+                                <span class="badge bg-success">
+                                    <span th:text="${sharedList.purchasedItems != null ? sharedList.purchasedItems : 0}">0</span> completed
+                                </span>
+                                <span th:if="${sharedList.priority}" 
+                                      th:class="${'badge ' + 
+                                      (sharedList.priority == 'URGENT' ? 'bg-danger' : 
+                                       sharedList.priority == 'HIGH' ? 'bg-warning' : 
+                                       sharedList.priority == 'MEDIUM' ? 'bg-info' : 'bg-secondary')}"
+                                      th:text="${sharedList.priority}">Priority</span>
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-person me-1"></i>
+                                    <span th:text="${sharedList.ownerName}">Owner Name</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 text-md-end">
+                            <div class="d-grid gap-2">
+                                <a th:href="@{/lists/{id}(id=${sharedList.id})}" class="btn btn-outline-primary">View List</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(sharedLists)}" class="mt-5">
+            <div class="text-center py-5">
+                <div class="text-muted mb-3">
+                    <i class="bi bi-share fs-1"></i>
+                </div>
+                <h5>No shared lists yet</h5>
+                <p class="text-muted">When someone shares a list with you, it will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/app.js"></script>
+    <script type="module" src="/js/modules/lists.js"></script>
+    
+    <div th:replace="~{layouts/fragments/footer :: footer}"></div>
+</body>
+</html>

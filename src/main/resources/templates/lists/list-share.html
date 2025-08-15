@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share List - Shopping List App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/common.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{layouts/fragments/navbar :: navbar}"></div>
+
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1>Share List</h1>
+                    <p class="text-muted" th:text="${shoppingList.name}">List Name</p>
+                </div>
+                <div class="col-auto">
+                    <a href="/lists" class="btn btn-outline-secondary">Back to Lists</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Share with User</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="shareForm">
+                            <div class="mb-3">
+                                <label for="userEmail" class="form-label">User Email</label>
+                                <input type="email" class="form-control" id="userEmail" name="userEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="permission" class="form-label">Permission</label>
+                                <select class="form-select" id="permission" name="permission" required>
+                                    <option value="VIEW">View Only</option>
+                                    <option value="EDIT">Edit</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="expirationDate" class="form-label">Expiration Date (Optional)</label>
+                                <input type="datetime-local" class="form-control" id="expirationDate" name="expirationDate">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Share List</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Current Shares</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${existingShares.empty}" class="text-muted">
+                            No shares yet
+                        </div>
+                        <div th:each="share : ${existingShares}" class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <div th:text="${share.sharedToUserName}">User Name</div>
+                                <small class="text-muted" th:text="${share.permission}">Permission</small>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" 
+                                    data-action="revoke" th:data-id="${share.id}">
+                                Revoke
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/app.js"></script>
+    <script type="module" src="/js/modules/list-share.js"></script>
+    
+    <div th:replace="~{layouts/fragments/footer :: footer}"></div>
+</body>
+</html>

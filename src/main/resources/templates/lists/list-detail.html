@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${list.name} + ' - Shopping List'">Shopping List Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+    <div th:replace="~{layouts/fragments/navbar :: navbar}"></div>
+
+    <div class="page-header text-center">
+        <div class="container">
+            <h1 th:text="${list.name}">List Name</h1>
+            <p th:if="${list.description}" th:text="${list.description}" class="text-muted">Description</p>
+        </div>
+    </div>
+
+    <div class="container list-detail">
+        <div class="action-bar mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h3 mb-1">List Details</h2>
+                    <p class="text-muted mb-0" th:text="${list.description}">Description</p>
+                    <div class="mt-2">
+                        <span th:if="${list.status.name() == 'ACTIVE'}" class="badge bg-success">
+                            <i class="bi bi-play-circle"></i> Active
+                        </span>
+                        <span th:if="${list.status.name() == 'ARCHIVED'}" class="badge bg-secondary">
+                            <i class="bi bi-archive"></i> Completed
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/lists" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Lists
+                    </a>
+                    <a th:href="@{/lists/{id}/edit(id=${list.id})}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit List
+                    </a>
+                    <a th:href="@{/lists/{id}/share(id=${list.id})}" class="btn btn-outline-info">
+                        <i class="bi bi-share"></i> Share
+                    </a>
+                    <form th:if="${list.status.name() == 'ACTIVE'}" th:action="@{/lists/{id}/status(id=${list.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-success" 
+                                onclick="return confirm('Mark this list as completed? This action cannot be undone.')">
+                            <i class="bi bi-check-circle"></i> Mark as Completed
+                        </button>
+                    </form>
+                    <form th:if="${list.status.name() == 'ARCHIVED'}" th:action="@{/lists/{id}/status(id=${list.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-warning" 
+                                onclick="return confirm('Reactivate this list?')">
+                            <i class="bi bi-arrow-clockwise"></i> Reactivate
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="bi bi-cart text-primary mb-2" style="font-size: 2rem;"></i>
+                        <h3 class="card-title" th:text="${#lists.size(items)}">0</h3>
+                        <p class="card-text text-muted">Total Items</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle text-success mb-2" style="font-size: 2rem;"></i>
+                        <h3 class="card-title" th:text="${#lists.size(items.?[isPurchased])}">0</h3>
+                        <p class="card-text text-muted">Completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="bi bi-currency-dollar text-info mb-2" style="font-size: 2rem;"></i>
+                        <h3 class="card-title" th:text="${'$' + #numbers.formatDecimal(totalEstimated, 1, 2)}">$0.00</h3>
+                        <p class="card-text text-muted">Estimated Cost</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="bi bi-wallet2 text-warning mb-2" style="font-size: 2rem;"></i>
+                        <h3 class="card-title" th:text="${'$' + #numbers.formatDecimal(totalSpent, 1, 2)}">$0.00</h3>
+                        <p class="card-text text-muted">Total Spent</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Progress</h5>
+                <div class="progress mb-2" style="height: 12px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         th:style="'width: ' + ${completionPercent} + '%'"
+                         th:aria-valuenow="${completionPercent}" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+                <small class="text-muted">
+                    <span th:text="${#lists.size(items.?[isPurchased])}">0</span> of 
+                    <span th:text="${#lists.size(items)}">0</span> items completed
+                    (<span th:text="${#numbers.formatDecimal(completionPercent, 1, 1)}">0</span>%)
+                </small>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> Add New Item
+                </h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/lists/{listId}/items(listId=${list.id})}" method="post" th:object="${newItem}" data-submitting="false" th:attr="data-list-id=${list.id}" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       th:field="*{name}" placeholder="Item name" required>
+                                <label for="name">Item Name *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-floating">
+                                <select class="form-select" id="categoryId" name="categoryId" th:field="*{categoryId}">
+                                    <option value="">Select category</option>
+                                    <option th:each="category : ${categories}" 
+                                            th:value="${category.id}" 
+                                            th:text="${category.name}">Category</option>
+                                </select>
+                                <label for="categoryId">Category</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="quantity" name="quantity" 
+                                       th:field="*{quantity}" placeholder="1" min="1" value="1" required>
+                                <label for="quantity">Quantity</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="estimatedPrice" name="estimatedPrice" 
+                                       th:field="*{estimatedPrice}" placeholder="0.00" min="0" step="0.01">
+                                <label for="estimatedPrice">Est. Price</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-floating">
+                                <select class="form-select" id="priority" name="priority" th:field="*{priority}">
+                                    <option value="">Select priority</option>
+                                    <option value="URGENT">Urgent</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="LOW">Low</option>
+                                </select>
+                                <label for="priority">Priority</label>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary h-100 w-100" id="addItemSubmitBtn">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul"></i> Items
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(items)}" class="empty-state text-center py-5">
+                    <i class="bi bi-inbox text-muted mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted">No items in this list yet</h5>
+                    <p class="text-muted">Add your first item using the form above</p>
+                </div>
+
+                <div th:each="item : ${items}" class="card mb-3" 
+                     th:classappend="${item.isPurchased ? 'border-success bg-light' : ''}">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h6 class="card-title mb-2" th:text="${item.name}">Item Name</h6>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-secondary" th:text="${item.categoryName}">Category</span>
+                                    <span class="badge bg-info" th:text="'Qty: ' + ${item.quantity}">Qty: 1</span>
+                                                                    <span th:if="${item.priority != null}" class="badge bg-warning"
+                                          th:text="${item.priority}">Priority</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-end">
+                                    <div th:if="${item.estimatedPrice}" class="text-muted small">
+                                        Est: <span th:text="${'$' + #numbers.formatDecimal(item.estimatedPrice, 1, 2)}">$0.00</span>
+                                    </div>
+                                    <div th:if="${item.actualPrice}" class="text-success fw-bold">
+                                        Actual: <span th:text="${'$' + #numbers.formatDecimal(item.actualPrice, 1, 2)}">$0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="button" class="btn btn-success btn-sm" 
+                                            th:if="${!item.isPurchased}"
+                                            th:onclick="'toggleItemStatus(' + ${item.id} + ')'">
+                                        <i class="bi bi-check-circle"></i> Complete
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm" 
+                                            th:if="${item.isPurchased}"
+                                            th:onclick="'toggleItemStatus(' + ${item.id} + ')'">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                            onclick="handleDelete('item', this.getAttribute('data-item-id'))"
+                                            th:data-item-id="${item.id}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/app.js"></script>
+    
+    <script>
+        function toggleItemStatus(itemId) {
+            console.log('toggleItemStatus called with ID:', itemId);
+            if (window.app && window.app.modules && window.app.modules.items) {
+                window.app.modules.items.toggleStatus(itemId)
+                    .then(response => {
+                        if (response) {
+                            if (window.app.modules.uiManager) {
+                                window.app.modules.uiManager.showAlert('Item status updated!', 'success');
+                            } else {
+                                alert('Item status updated!');
+                            }
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error toggling item status:', error);
+                        if (window.app.modules.uiManager) {
+                            window.app.modules.uiManager.showAlert('Error updating item status', 'danger');
+                        } else {
+                            alert('Error updating item status: ' + error.message);
+                        }
+                    });
+            } else {
+                console.error('App not ready yet, trying to initialize...');
+                if (typeof window.ShoppingListApp !== 'undefined') {
+                    window.app = new window.ShoppingListApp();
+                    console.log('App initialized for toggle:', window.app);
+                    setTimeout(() => {
+                        if (window.app && window.app.modules && window.app.modules.items) {
+                            console.log('Retrying toggle with initialized app...');
+                            toggleItemStatus(itemId);
+                        } else {
+                            console.error('Failed to initialize app for toggle');
+                            alert('Failed to initialize application. Please refresh the page.');
+                        }
+                    }, 100);
+                } else {
+                    console.error('ShoppingListApp not found for toggle');
+                    alert('Application not loaded. Please refresh the page.');
+                }
+            }
+        }
+
+        function toggleDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo) {
+                debugInfo.classList.toggle('d-none');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const addItemForm = document.querySelector('form[action*="/items"]');
+            if (addItemForm) {
+                console.log('Found add item form:', addItemForm);
+                console.log('Form data-list-id:', addItemForm.getAttribute('data-list-id'));
+                
+                addItemForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const data = {
+                        name: formData.get('name'),
+                        quantity: parseInt(formData.get('quantity')) || 1,
+                        estimatedPrice: parseFloat(formData.get('estimatedPrice')) || null,
+                        categoryId: formData.get('categoryId') || null,
+                        priority: formData.get('priority') || 'MEDIUM'
+                    };
+                    
+                    console.log('Form data:', data);
+                    
+                    if (!data.name || !data.name.trim()) {
+                        alert('Item name is required');
+                        return;
+                    }
+                    
+                    if (!data.categoryId || data.categoryId === '') {
+                        alert('Please select a category');
+                        return;
+                    }
+                    
+                    if (window.app && window.app.modules && window.app.modules.items) {
+                        const listId = this.getAttribute('data-list-id');
+                        console.log('Adding item to list ID:', listId);
+                        console.log('Form element:', this);
+                        console.log('All form attributes:', this.attributes);
+                        
+                        if (!listId || listId === '${list.id}') {
+                            console.error('Invalid list ID:', listId);
+                            if (window.app.modules.uiManager) {
+                                window.app.modules.uiManager.showAlert('Error: Invalid list ID', 'danger');
+                            } else {
+                                alert('Error: Invalid list ID - ' + listId);
+                            }
+                            return;
+                        }
+                        
+                        window.app.modules.items.addToList(listId, data)
+                            .then(response => {
+                                if (response) {
+                                    this.reset();
+
+                                    if (window.app.modules.uiManager) {
+                                        window.app.modules.uiManager.showAlert('Item added successfully!', 'success');
+                                    } else {
+                                        alert('Item added successfully!');
+                                    }
+
+                                    window.location.reload();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error adding item:', error);
+
+                                if (window.app.modules.uiManager) {
+                                    window.app.modules.uiManager.showAlert('Error adding item', 'danger');
+                                } else {
+                                    alert('Error adding item: ' + error.message);
+                                }
+                            });
+                    } else {
+                        console.log('App not ready, trying to initialize...');
+
+                        if (typeof window.ShoppingListApp !== 'undefined') {
+                            window.app = new window.ShoppingListApp();
+                            console.log('App initialized:', window.app);
+                            setTimeout(() => {
+                                if (window.app && window.app.modules && window.app.modules.items) {
+                                    console.log('Retrying with initialized app...');
+                                    this.dispatchEvent(new Event('submit'));
+                                } else {
+                                    console.error('Failed to initialize app');
+                                    alert('Failed to initialize application. Please refresh the page.');
+                                }
+                            }, 100);
+                        } else {
+                            console.error('ShoppingListApp not found');
+                            alert('Application not loaded. Please refresh the page.');
+                        }
+                    }
+                });
+            }
+            
+            const toggleForms = document.querySelectorAll('form[action*="/toggle"]');
+            toggleForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const actionUrl = this.getAttribute('action');
+                    const itemIdMatch = actionUrl.match(/\/items\/(\d+)\/toggle/);
+                    if (itemIdMatch) {
+                        const itemId = itemIdMatch[1];
+                        
+                        if (window.app && window.app.modules && window.app.modules.items) {
+                            window.app.modules.items.toggleStatus(itemId)
+                                .then(response => {
+                                    if (response) {
+
+                                        if (window.app.modules.uiManager) {
+                                            window.app.modules.uiManager.showAlert('Item status updated!', 'success');
+                                        }
+
+                                        window.location.reload();
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error toggling item status:', error);
+                                    if (window.app.modules.uiManager) {
+                                        window.app.modules.uiManager.showAlert('Error updating item status', 'danger');
+                                    }
+                                });
+                        } else {
+                            this.submit();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <div th:replace="~{layouts/fragments/footer :: footer}"></div>
+</body>
+</html> 
