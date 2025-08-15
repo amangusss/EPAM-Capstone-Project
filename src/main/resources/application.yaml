@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: ShoppingListApplication
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/database
+    username: user
+    password: 12345678
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    enabled: true
+
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+server:
+  port: 2020
+  error:
+    whitelabel:
+      enabled: false
+    path: /error
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+    include-exception: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+      thymeleaf: DEBUG
