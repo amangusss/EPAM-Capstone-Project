@@ -1,8 +1,15 @@
 HELP.md
 target/
+*.yaml
+
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+*.properties
+mvnw
+*.cmd
+.gitattributes
 
 ### STS ###
 .apt_generated
@@ -52,5 +59,3 @@ replay_pid*
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-!**/src/**/application.yaml
