@@ -11,14 +11,14 @@ class FormHandler {
 
         if (form.id === 'editBudgetForm' || form.id === 'editCategoryForm' || form.id === 'editItemForm' ||
             form.id === 'editShoppingListForm' ||
-            form.action.includes('/items') ||
+            (form.action.includes('/items') && !form.action.includes('/budgets/create') && !form.action.includes('/categories/create') && !form.action.includes('/shopping-lists/create')) ||
             (form.action.includes('/lists/') && form.action.includes('/items')) ||
             form.action.includes('/toggle') ||
             form.action.includes('/api/') ||
-            form.action.includes('/budgets') ||
-            form.action.includes('/categories') ||
-            form.action.includes('/shopping-lists')) {
-            console.log('Skipping form with custom handler or item form:', form.id || form.action);
+            (form.action.includes('/budgets/edit') || form.action.includes('/budgets/update')) ||
+            (form.action.includes('/categories/edit') || form.action.includes('/categories/update')) ||
+            (form.action.includes('/shopping-lists/edit') || form.action.includes('/shopping-lists/update'))) {
+            console.log('Skipping form with custom handler, edit form, or item form:', form.id || form.action);
             event.preventDefault();
             return false;
         }
@@ -41,6 +41,13 @@ class FormHandler {
         }
 
         try {
+            form.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+            form.querySelectorAll('.invalid-feedback').forEach(errorDiv => {
+                errorDiv.remove();
+            });
+            
             const formData = new FormData(form);
             const url = form.action;
             const method = form.method || 'POST';
@@ -84,20 +91,55 @@ class FormHandler {
 
             console.log('Response received:', response);
 
-            if (response.success) {
-                this.app.modules.uiManager.showAlert(response.message || 'Operation completed successfully!', 'success');
+            let responseData;
+            if (response.ok) {
+                try {
+                    responseData = await response.json();
+                } catch (e) {
+                    responseData = { success: true, message: 'Operation completed successfully' };
+                }
+            } else {
+                responseData = { success: false, message: 'Request failed' };
+            }
 
-                if (response.redirect) {
-                    window.location.href = response.redirect;
-                } else if (response.reload) {
+            console.log('Response data:', responseData);
+
+            if (responseData.success) {
+                this.app.modules.uiManager.showAlert(responseData.message || 'Operation completed successfully!', 'success');
+
+                if (responseData.redirect) {
+                    window.location.href = responseData.redirect;
+                } else if (responseData.reload) {
                     window.location.reload();
                 } else {
-                    if (url.includes('/items')) {
+                    if (url.includes('/items') || url.includes('/budgets/create') || url.includes('/categories/create') || url.includes('/shopping-lists/create')) {
                         window.location.reload();
                     }
                 }
             } else {
-                this.app.modules.uiManager.showAlert(response.message || 'An error occurred', 'danger');
+                if (responseData.fieldErrors) {
+                    form.querySelectorAll('.is-invalid').forEach(field => {
+                        field.classList.remove('is-invalid');
+                    });
+                    
+                    Object.entries(responseData.fieldErrors).forEach(([fieldName, errorMessage]) => {
+                        const field = form.querySelector(`[name="${fieldName}"]`);
+                        if (field) {
+                            field.classList.add('is-invalid');
+                            let errorDiv = field.parentNode.querySelector('.invalid-feedback');
+                            if (!errorDiv) {
+                                errorDiv = document.createElement('div');
+                                errorDiv.className = 'invalid-feedback';
+                                field.parentNode.appendChild(errorDiv);
+                            }
+                            errorDiv.textContent = errorMessage;
+                        }
+                    });
+                    
+                    this.app.modules.uiManager.showAlert('Please correct the errors below', 'danger');
+                } else {
+                    this.app.modules.uiManager.showAlert(responseData.message || 'An error occurred', 'danger');
+                }
             }
         } catch (error) {
             console.error('Form submission error:', error);
