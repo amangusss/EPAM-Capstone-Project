@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Shopping List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+    <div th:replace="~{layouts/fragments/navbar :: navbar}"></div>
+
+    <div class="page-header text-center">
+        <div class="container">
+            <h1><i class="bi bi-plus-circle"></i> Create New Shopping List</h1>
+            <p>Organize your shopping with a new list</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h3 mb-1">New Shopping List</h2>
+                <p class="text-muted mb-0">Organize your shopping with a new list</p>
+            </div>
+            <a href="/lists" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Lists
+            </a>
+        </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="form-card">
+                    <form th:action="@{/lists/create}" method="post" th:object="${list}">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           th:field="*{name}" placeholder="List name" required
+                                           th:class="${#fields.hasErrors('name')} ? 'form-control is-invalid' : 'form-control'">
+                                    <label for="name">List Name *</label>
+                                    <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback">
+                                        <span th:errors="*{name}">Name error</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <select class="form-select" id="status" name="status" th:field="*{status}">
+                                        <option value="ACTIVE">Active</option>
+                                        <option value="COMPLETED">Completed</option>
+                                        <option value="ARCHIVED">Archived</option>
+                                    </select>
+                                    <label for="status">Status</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating">
+                            <textarea class="form-control" id="description" name="description" 
+                                      th:field="*{description}" placeholder="Description" 
+                                      style="height: 100px"></textarea>
+                            <label for="description">Description (Optional)</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <select class="form-select" id="priority" name="priority" th:field="*{priority}">
+                                <option value="LOW">Low Priority</option>
+                                <option value="MEDIUM" selected>Medium Priority</option>
+                                <option value="HIGH">High Priority</option>
+                                <option value="URGENT">Urgent</option>
+                            </select>
+                            <label for="priority">Priority Level</label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="/lists" class="btn btn-secondary me-md-2">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-submit">
+                                <i class="bi bi-check-circle"></i> Create List
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle"></i> Tips for Creating Lists
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li>Use descriptive names to easily identify your lists</li>
+                            <li>Set priority levels to organize important items</li>
+                            <li>Add descriptions for additional context</li>
+                            <li>Choose appropriate status for your list</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <div th:replace="~{layouts/fragments/footer :: footer}"></div>
+</body>
+</html>
