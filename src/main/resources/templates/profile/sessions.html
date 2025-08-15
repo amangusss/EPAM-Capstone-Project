@@ -346,7 +346,7 @@
                 return;
             }
 
-            const sessionsHTML = sampleSessions.map(session => `
+            container.innerHTML = sampleSessions.map(session => `
                 <div class="border-bottom p-3 session-card">
                     <div class="row align-items-center">
                         <div class="col-md-2">
@@ -382,8 +382,6 @@
                     </div>
                 </div>
             `).join('');
-
-            container.innerHTML = sessionsHTML;
         }
 
         function viewSessionDetails(sessionId) {
