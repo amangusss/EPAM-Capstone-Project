@@ -12,3 +12,6 @@ Final project included in EPAM "JAVA, WCA#13" 2025 course
 
 ## Database Layer Design
 ### 📄 [Google Docs](https://docs.google.com/document/d/1FJgNePgm6CpqDIRw36QeeQmoHC-C0E_aoY03cUPBmFI/edit?usp=sharing)
+
+## Design of the Web pages
+### 📋 [Canva Whiteboard](https://www.canva.com/design/DAGwJgPjYLY/vrj2o8ofTKGsND5e_893lw/edit?utm_content=DAGwJgPjYLY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
